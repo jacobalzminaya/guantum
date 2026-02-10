@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <title>Quantum Alpha PRO v23 | Super-IA Edition</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+    <div id="mouse-overlay"></div>
+
+    <div class="terminal" id="main-terminal">
+        <div class="header-info" style="border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 10px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <span style="font-size: 8px; color: var(--accent);">LATENCIA</span>
+                <span id="speed-meter">MS: 0</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <span style="font-size: 8px; color: var(--up-neon);">FUERZA V23</span>
+                <span id="power-index">0.0</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                <span style="font-size: 8px; color: var(--down-neon);">RUIDO</span>
+                <span id="noise-index">0%</span>
+            </div>
+        </div>
+<div class="data-visualization" style="
+    position: relative; 
+    height: 50px; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+    overflow: hidden; 
+    background: rgba(0,0,0,0.3); 
+    border-radius: 8px; 
+    border: 1px solid var(--border); 
+    padding: 8px 0;
+">
+    <canvas id="flow-chart" style="
+        flex-grow: 1; 
+        width: 100%; 
+        max-height: 70px; 
+        filter: drop-shadow(0 0 8px var(--accent));
+    "></canvas>
+    
+    <div class="input-track" id="symbols-track" style="
+        background: rgba(255,255,255,0.05); 
+        border: none; 
+        height: 22px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+    ">
+        <span style="color: var(--text-dim); font-size: 8px; letter-spacing: 2px;">SISTEMA DE ADN ACTIVO</span>
+    </div>
+</div>
+
+        <div class="config-pod" style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px;">
+            
+            <div style="display: flex; gap: 6px; align-items: stretch;">
+                <button id="mouseBtn" class="btn" onclick="toggleMouse()" style="flex: 2; background: rgba(74, 144, 226, 0.1); border: 1px solid var(--accent); color: var(--accent); font-size: 11px; font-weight: 900; letter-spacing: 1px;">RADAR</button>
+                <button class="btn" id="risk-cycle-btn" onclick="cycleRisk()" style="flex: 1; border-color: var(--accent); color: var(--accent); font-weight: bold; font-size: 10px;">R: N3</button>
+                <div class="time-wrapper" style="flex: 1; display: flex; align-items: center; background: var(--bg-color); border: 1px solid var(--border); border-radius: 6px; padding: 0 6px;">
+                    <span style="font-size: 9px; opacity: 0.6;">⌛</span>
+                    <select id="timeList" onchange="handleTimeSelection(this.value)" class="btn" style="border: none; background: transparent; font-size: 11px; width: 100%; padding: 8px 2px;">
+                        <option value="5">5S</option>
+                        <option value="15">15S</option>
+                        <option value="30" selected>30S</option>
+                        <option value="60">1M</option>
+                        <option value="300">5M</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 6px; align-items: stretch;">
+                <div class="ia-modes-grid" style="flex: 3; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
+                    <button id="neuralBtn" class="btn active" onclick="toggleNeuralMode()" style="padding: 8px 0; font-size: 9px;">NEU</button>
+                    <button id="trendBtn" class="btn active" onclick="toggleTrendMode()" style="padding: 8px 0; font-size: 9px;">TRD</button>
+                    <button id="confluenceBtn" class="btn active" onclick="toggleConfluence()" style="padding: 8px 0; font-size: 9px;">CFL</button>
+                    <button id="adaptiveBtn" class="btn active" onclick="toggleAdaptive()" style="padding: 8px 0; font-size: 9px;">ADP</button>
+                </div>       
+                <button id="autoPilotBtn" class="btn" onclick="toggleAutoPilot()" style="flex: 1.2; font-size: 9px; border-color: #ff9f43; color: #ff9f43; font-weight: bold;">AUTO</button>
+                <button onclick="undoLastInput(event)" class="btn" style="flex: 0.4; color: var(--down-neon); font-size: 14px; display: flex; align-items: center; justify-content: center; position: relative; z-index: 100;">↶</button>
+            </div>
+        </div>
+
+        <div id="status-track" style="margin-bottom: 10px; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 8px; border-left: 3px solid var(--accent);">
+            <div id="status-message" style="color: var(--text-dim); font-size: 8px; letter-spacing: 1px; margin-bottom: 2px;">SISTEMA READY</div>
+            <div id="ia-report" style="display: flex; justify-content: space-between; align-items: center;">
+                <span id="ia-logic" style="color: var(--up-neon); font-family: monospace; font-size: 11px; font-weight: bold;">IA: WAITING FLOW</span>
+                <span id="ia-stake" style="font-weight: 900; color: #fff; background: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 11px; box-shadow: 0 0 10px var(--glow);">STK: --</span>
+            </div>
+        </div>
+
+        <div class="signal-zone" style="height: 150px; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);">
+            <div id="big-icon" style="font-size: 55px; margin-bottom: 0px;"></div>
+            <div id="op-status" style="letter-spacing: 3px; font-weight: 900; font-size: 16px; margin-top: -5px;">SCANNING</div>
+            <div id="op-timer">--</div> 
+            <div id="op-details" style="font-size: 9px; color: var(--accent); opacity: 0.8;">CALIBRANDO SENSORES</div>
+            <div id="timer-bar"></div>
+        </div>
+
+        <div class="feedback-grid" id="f-grid">
+            <div id="result-step" style="width: 100%; display: flex; gap: 10px;">
+                <button id="winBtn" class="feed-btn win" onclick="handleWinClick()" style="flex: 2;">WIN</button>
+                <button id="lossBtn" class="feed-btn loss" onclick="recordResult(false)" style="flex: 1;">LOSS</button>
+            </div>
+            <div id="color-step" style="display: none; gap: 10px; width: 100%;">
+                <button onclick="recordResult(true, 'A')" class="feed-btn" style="background: var(--up-neon); color: #000; flex: 1;">VERDE ▲</button>
+                <button onclick="recordResult(true, 'B')" class="feed-btn" style="background: var(--down-neon); color: #fff; flex: 1;">ROJA ▼</button>
+            </div>
+        </div>
+
+        <div id="manual-touch-zone">
+            <div class="touch-trigger t-up" onclick="if(!isSignalActive) registerInput('A')">▲</div>
+            <div class="touch-trigger t-down" onclick="if(!isSignalActive) registerInput('B')">▼</div>
+        </div>
+
+        <div style="display: flex; gap: 4px; margin-top: 15px; opacity: 0.6; border-top: 1px solid var(--border); padding-top: 10px;">
+            <button onclick="alert(getAdvancedDiagnostics())" class="btn" style="font-size: 7px; flex: 1; border: none; background: transparent;">🧠 DIAGNÓSTICO</button>
+            <button onclick="exportHistoryToCSV()" class="btn" style="font-size: 7px; flex: 1; border: none; background: transparent;">📊 DATALOG</button>
+            <button onclick="if(confirm('¿Borrar historial?')) clearFullHistory()" class="btn" style="font-size: 7px; color: var(--down-neon); flex: 0.5; border: none; background: transparent;">RESET</button>
+        </div>
+    </div>
+
+    <script src="state.js"></script>
+    <script src="engine.js"></script>
+    <script src="ui.js"></script>
+    <script src="controls.js"></script>
+    <script src="super-ia-v23.js"></script>
+    <script src="ai.js"></script>
+    <script src="quantum_smc_ai.js"></script>
+    <script src="main.js"></script>
+
+</body>
+</html>
