@@ -199,6 +199,10 @@ function undoLastInput(e) {
 function setTime(s, btn) {
     if (isSignalActive) return;
     selectedTime = s;
+    
+    // Guardar específicamente el tiempo para asegurar persistencia
+    localStorage.setItem('selectedTime', s); 
+
     const buttons = document.querySelectorAll('#time-group .btn');
     buttons.forEach(b => b.classList.remove('active'));
     
@@ -207,7 +211,8 @@ function setTime(s, btn) {
     } else {
         document.getElementById(`t${s}`)?.classList.add('active');
     }
-    saveConfig();
+    
+    if(typeof saveConfig === 'function') saveConfig();
     if(typeof AudioEngine !== 'undefined') AudioEngine.play("CLICK");
 }
 
@@ -525,3 +530,4 @@ function hardResetApp() {
         }, 500);
     }
 }
+
